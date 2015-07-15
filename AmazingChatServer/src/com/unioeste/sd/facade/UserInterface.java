@@ -1,4 +1,4 @@
-package com.unioeste.sd;
+package com.unioeste.sd.facade;
 
 import java.net.Inet4Address;
 import java.rmi.Remote;
@@ -11,4 +11,5 @@ public interface UserInterface extends Remote{
 	public void setStatus(String status) throws RemoteException;
 	public Inet4Address getIp() throws RemoteException;
 	public void setIp(Inet4Address ip) throws RemoteException;
+	public void receive(MessageInterface message) throws RemoteException;
 }

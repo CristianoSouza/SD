@@ -1,8 +1,11 @@
-package com.unioeste.sd;
+package com.unioeste.sd.implement;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.Date;
+
+import com.unioeste.sd.facade.MessageInterface;
+import com.unioeste.sd.facade.UserInterface;
 
 public class Message extends UnicastRemoteObject implements MessageInterface{
 
@@ -11,43 +14,51 @@ public class Message extends UnicastRemoteObject implements MessageInterface{
 	}
 	
 	private static final long serialVersionUID = 1L;
-	private User user;
+	private UserInterface user;
 	private String message;
 	private Date date;
-	private Type type; // false for unicast and true to multicast 
+	private Type type; 
 	
-	protected Message() throws RemoteException {
+	public Message() throws RemoteException {
 		super();
 	}
 	
-	public User getUser() {
+	@Override
+	public UserInterface getUser() {
 		return user;
 	}
-
-	public void setUser(User user) {
+	
+	@Override
+	public void setUser(UserInterface user) {
 		this.user = user;
 	}
 
+	@Override
 	public String getMessage() {
 		return message;
 	}
 
+	@Override
 	public void setMessage(String message) {
 		this.message = message;
 	}
 
+	@Override
 	public Date getDate() {
 		return date;
 	}
 
+	@Override
 	public void setDate(Date date) {
 		this.date = date;
 	}
 
+	@Override
 	public Type getType() {
 		return type;
 	}
 
+	@Override
 	public void setType(Type type) {
 		this.type = type;
 	}

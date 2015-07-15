@@ -1,4 +1,4 @@
-package com.unioeste.sd;
+package com.unioeste.sd.facade;
 
 import java.rmi.Remote;
 

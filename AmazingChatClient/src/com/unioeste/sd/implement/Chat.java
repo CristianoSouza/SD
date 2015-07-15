@@ -1,7 +1,9 @@
-package com.unioeste.sd;
+package com.unioeste.sd.implement;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+
+import com.unioeste.sd.facade.ChatInterface;
 
 public class Chat extends UnicastRemoteObject implements ChatInterface{
 
