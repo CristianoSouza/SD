@@ -1,3 +1,0 @@
-INDEX VERSION 1.127+/home/cristiano/Documentos/Facul/SD/.metadata/.plugins/org.eclipse.jdt.core
-868532848.index
-2934772691.index
