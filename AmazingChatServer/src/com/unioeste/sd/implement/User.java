@@ -4,10 +4,10 @@ import java.net.Inet4Address;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-import com.unioeste.sd.facade.MessageInterface;
-import com.unioeste.sd.facade.UserInterface;
+import com.unioeste.sd.facade.FacadeMessage;
+import com.unioeste.sd.facade.FacadeUser;
 
-public class User extends UnicastRemoteObject implements UserInterface {
+public class User extends UnicastRemoteObject implements FacadeUser {
 	
 	private static final long serialVersionUID = 1L;
 	private String name;
@@ -49,7 +49,7 @@ public class User extends UnicastRemoteObject implements UserInterface {
 	}
 
 	@Override
-	public void receive(MessageInterface message) throws RemoteException {
+	public void receive(FacadeMessage message) throws RemoteException {
 		System.out.println(message.getUser() + ": " + message.getMessage());
 	}
 }

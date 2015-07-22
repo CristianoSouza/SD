@@ -4,17 +4,17 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.Date;
 
-import com.unioeste.sd.facade.MessageInterface;
-import com.unioeste.sd.facade.UserInterface;
+import com.unioeste.sd.facade.FacadeMessage;
+import com.unioeste.sd.facade.FacadeUser;
 
-public class Message extends UnicastRemoteObject implements MessageInterface{
+public class Message extends UnicastRemoteObject implements FacadeMessage{
 
 	public static enum Type {
 		UNICAST, BROADCAST
 	}
 	
 	private static final long serialVersionUID = 1L;
-	private UserInterface user;
+	private FacadeUser user;
 	private String message;
 	private Date date;
 	private Type type; 
@@ -24,12 +24,12 @@ public class Message extends UnicastRemoteObject implements MessageInterface{
 	}
 	
 	@Override
-	public UserInterface getUser() {
+	public FacadeUser getUser() {
 		return user;
 	}
 	
 	@Override
-	public void setUser(UserInterface user) {
+	public void setUser(FacadeUser user) {
 		this.user = user;
 	}
 

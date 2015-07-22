@@ -5,55 +5,55 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.unioeste.sd.facade.ChatInterface;
-import com.unioeste.sd.facade.MessageInterface;
-import com.unioeste.sd.facade.UserInterface;
+import com.unioeste.sd.facade.FacadeChat;
+import com.unioeste.sd.facade.FacadeMessage;
+import com.unioeste.sd.facade.FacadeUser;
 
-public class Chat extends UnicastRemoteObject implements ChatInterface {
+public class Chat extends UnicastRemoteObject implements FacadeChat {
 
 	private static final long serialVersionUID = 1L;
-	private List<UserInterface> users;
+	private List<FacadeUser> users;
 
 	public Chat() throws RemoteException {
 		super();
 		System.out.println("Initializing server ...");
-		this.users = new ArrayList<UserInterface>();
+		this.users = new ArrayList<FacadeUser>();
 	}
 
 	@Override
-	public void login(UserInterface user) throws RemoteException {
+	public void login(FacadeUser user) throws RemoteException {
 		System.out.println("User " + user.getName() + " is now logged in");
 		this.users.add(user);
 	}
 
 	@Override
-	public void logout(UserInterface user) throws RemoteException {
+	public void logout(FacadeUser user) throws RemoteException {
 		System.out.println("User " + user.getName() + "has left");
 		this.users.remove(user);
 	}
 
 	@Override
-	public void sendBroadcastMessage(MessageInterface message) throws RemoteException {
+	public void sendBroadcastMessage(FacadeMessage message) throws RemoteException {
 		System.out.println("Sending broadcast message");
-		for(UserInterface user : this.users){
+		for(FacadeUser user : this.users){
 			user.receive(message);
 		}		
 	}
 
 	@Override
-	public void sendUnicastMessage(UserInterface target, MessageInterface message) throws RemoteException {
+	public void sendUnicastMessage(FacadeUser target, FacadeMessage message) throws RemoteException {
 		System.out.println("Sending unicast message");
 		target.receive(message);
 	}
 
 	@Override
-	public UserInterface[] getLoggedUsers() throws RemoteException {
-		return (UserInterface[]) this.users.toArray();
+	public FacadeUser[] getLoggedUsers() throws RemoteException {
+		return (FacadeUser[]) this.users.toArray(new FacadeUser[this.users.size()]);
 	}
 
 	@Override
 	public void notifyChange() throws RemoteException {
-		for(UserInterface listener : users){
+		for(FacadeUser listener : users){
 			synchronized (listener) {
 				listener.notify();
 			}

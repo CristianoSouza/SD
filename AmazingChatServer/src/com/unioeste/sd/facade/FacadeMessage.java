@@ -6,9 +6,9 @@ import java.sql.Date;
 
 import com.unioeste.sd.implement.Message.Type;
 
-public interface MessageInterface extends Remote{
-	public void setUser(UserInterface user) throws RemoteException;
-	public UserInterface getUser() throws RemoteException;
+public interface FacadeMessage extends Remote{
+	public void setUser(FacadeUser user) throws RemoteException;
+	public FacadeUser getUser() throws RemoteException;
 	public String getMessage() throws RemoteException;
 	public void setMessage(String message) throws RemoteException;
 	public Date getDate() throws RemoteException;
