@@ -14,7 +14,7 @@ public class User extends UnicastRemoteObject implements UserInterface {
 	private String status;
 	private Inet4Address ip; 
 
-	protected User() throws RemoteException {
+	public User() throws RemoteException {
 		super();
 	}
 

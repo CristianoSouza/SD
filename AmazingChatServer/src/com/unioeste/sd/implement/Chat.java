@@ -16,7 +16,7 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 
 	public Chat() throws RemoteException {
 		super();
-		
+		System.out.println("Initializing server ...");
 		this.users = new ArrayList<UserInterface>();
 	}
 
