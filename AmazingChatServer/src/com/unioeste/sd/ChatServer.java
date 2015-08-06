@@ -18,13 +18,15 @@ public class ChatServer {
 		String address = "rmi://localhost:" + port + "/ChatService";*/
 		
 		try {
-            //System.setSecurityManager(new RMISecurityManager());
-            java.rmi.registry.LocateRegistry.createRegistry(65000);
+			
+            System.setSecurityManager(new RMISecurityManager());
+            //java.rmi.registry.LocateRegistry.createRegistry(11099);
             Chat obj = new Chat();
-            Naming.rebind("rmi://192.168.0.117/ABCD", obj);
+            
+            Naming.rebind("rmi://localhost/ABCD", obj);
 
             System.out.println("[System] Chat Server is ready.");
-
+            
             /*while(true){
                 String msg=s.nextLine().trim();
                 if (server.getLoggedUsers()!=null){
