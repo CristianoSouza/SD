@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class ChatClient {
     public static void main(String[] args) {
         try {
-            ChatInterface server = (ChatInterface) Naming.lookup("rmi://192.168.0.117/ABCD");
+            ChatInterface server = (ChatInterface) Naming.lookup("rmi://localhost/ABCD");
 
             Scanner scanner=new Scanner(System.in);
             System.out.println("[System] Client Messenger is running");
@@ -22,7 +22,7 @@ public class ChatClient {
             MessageInterface message = new Message(user);
             message.setMessage("Just Connected");
             server.login(user);
-            server.sendBroadcastMessage(message,user);
+            //server.sendBroadcastMessage(message,user);
             for(;;){
                 String aa = scanner.nextLine();
                 message.setMessage(aa);

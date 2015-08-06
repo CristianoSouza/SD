@@ -19,8 +19,8 @@ public class ChatServer {
 		
 		try {
 			
-            System.setSecurityManager(new RMISecurityManager());
-            //java.rmi.registry.LocateRegistry.createRegistry(11099);
+            //System.setSecurityManager(new RMISecurityManager());
+            java.rmi.registry.LocateRegistry.createRegistry(1099);
             Chat obj = new Chat();
             
             Naming.rebind("rmi://localhost/ABCD", obj);
