@@ -1,11 +1,11 @@
 package com.unioeste.sd.implement;
 
-import com.unioeste.sd.facade.MessageInterface;
-import com.unioeste.sd.facade.UserInterface;
-
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.Date;
+
+import com.unioeste.sd.facade.MessageInterface;
+import com.unioeste.sd.facade.UserInterface;
 
 public class Message extends UnicastRemoteObject implements MessageInterface{
 
@@ -22,12 +22,11 @@ public class Message extends UnicastRemoteObject implements MessageInterface{
 	public Message() throws RemoteException {
 		super();
 	}
-
-    public Message(UserInterface user) throws RemoteException {
+	
+	public Message(UserInterface user) throws RemoteException {
         super();
         this.user = user;
     }
-	
 	@Override
 	public UserInterface getUser() {
 		return user;

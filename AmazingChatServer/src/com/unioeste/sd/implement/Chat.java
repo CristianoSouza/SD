@@ -15,7 +15,9 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 
 	private static final long serialVersionUID = 1L;
 	private List<UserInterface> users;
-
+	private Message message;
+	private ChatInterface client;
+	
 	public Chat() throws RemoteException {
         super();
 
@@ -28,6 +30,7 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 
 		System.out.println("User " + user.getName() + " is now logged in");
 
+
 	}
 
 	@Override
@@ -39,16 +42,8 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
     @Override
     public void sendBroadcastMessage(MessageInterface message, UserInterface from) throws RemoteException {
         System.out.println("["+from.getName()+"] "+message.getMessage());
-        Iterator<UserInterface> usernames = users.iterator();
-        while(usernames.hasNext()){
-            User user =(User) usernames.next();
-            MessageInterface m = (MessageInterface) users.get(users.indexOf(usernames.next()));
-            if (user.getName().equals(from.getName())){continue;}
-
-            try{
-                m.setMessage("\n[" + from.getName() +"] "+message.getMessage());
-            }catch(Exception e){e.printStackTrace();}
-        }
+        this.message = (Message) message;
+        message.setUser(from);
     }
 
     @Override
@@ -58,7 +53,9 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 
 	@Override
 	public UserInterface[] getLoggedUsers() throws RemoteException {
-		return (UserInterface[]) this.users.toArray();
+		UserInterface[] userArray = new UserInterface[users.size()];
+		userArray = (UserInterface[]) users.toArray(userArray);
+		return (userArray);
 	}
 
 	@Override
@@ -70,4 +67,21 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 		}
 	}
 
+	@Override
+	public ChatInterface getClient() throws RemoteException {
+		// TODO Auto-generated method stub
+		return this.client;
+	}
+
+	@Override
+	public void setClient(ChatInterface client) throws RemoteException {
+		// TODO Auto-generated method stub
+		this.client = client;
+	}
+
+	@Override
+	public Message getMessage() {
+		// TODO Auto-generated method stub
+		return this.message;
+	}
 }

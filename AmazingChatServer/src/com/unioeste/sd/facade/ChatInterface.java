@@ -12,4 +12,7 @@ public interface ChatInterface extends Remote{
 	public void sendUnicastMessage(UserInterface target,UserInterface from, MessageInterface message) throws RemoteException;
 	public UserInterface[] getLoggedUsers() throws RemoteException;
 	public void notifyChange() throws RemoteException;
+	public ChatInterface getClient() throws RemoteException;
+	public void setClient(ChatInterface client) throws RemoteException;
+	public Message getMessage();
 }

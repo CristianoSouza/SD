@@ -1,10 +1,10 @@
 package com.unioeste.sd.facade;
 
-import com.unioeste.sd.implement.Message.Type;
-
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.sql.Date;
+
+import com.unioeste.sd.implement.Message.Type;
 
 public interface MessageInterface extends Remote{
 	public void setUser(UserInterface user) throws RemoteException;

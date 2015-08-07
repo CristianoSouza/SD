@@ -23,13 +23,13 @@ public class ChatClient {
             message.setMessage("Just Connected");
             server.login(user);
             //server.sendBroadcastMessage(message,user);
-            for(;;){
+            /*for(;;){
                 String aa = scanner.nextLine();
                 message.setMessage(aa);
                 server.sendBroadcastMessage(message,user);
-            }
+            }*/
         }catch (Exception e) {
-            System.out.println("Hello Client exception: " + e);
+            System.out.println("Some Error has occurred: " + e);
             e.printStackTrace();
         }
     }
