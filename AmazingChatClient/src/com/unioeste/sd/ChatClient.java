@@ -1,5 +1,6 @@
 package com.unioeste.sd;
 
+import com.sun.prism.impl.Disposer.Target;
 import com.unioeste.sd.facade.ChatInterface;
 import com.unioeste.sd.facade.MessageInterface;
 import com.unioeste.sd.facade.UserInterface;
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ChatClient {
 	ChatInterface chat;
@@ -36,7 +38,7 @@ public class ChatClient {
                     if(count>0){
                     	System.out.println("[SYSTEM] - login name already exists. Chose another");
                     }
-                    System.out.println("Enter a username to login and press Enter:");
+                    System.out.println("[SYSTEM]-Enter a username to login and press Enter:");
                     
                     String username = scanner.nextLine();
                     user = new User();
@@ -58,23 +60,35 @@ public class ChatClient {
     	    	String choice = s.nextLine();
     	    	switch (choice) {
 				case "1":
-					System.out.println("Write your broadcast message followed by [ENTER]");
+					System.out.println("Write your broadcast message followed by [ENTER]");									
+					s = new Scanner(System.in);
+	    	    	String str = s.nextLine();
+	    	    	
+	    	    	Date date = new Date();
+	    	    	message.setDate(date);
+					message.setMessage(str);
 					
-					
-						s = new Scanner(System.in);
-		    	    	String str = s.nextLine();
-		    	    	
-		    	    	Date date = new Date();
-		    	    	message.setDate(date);
-						message.setMessage(str);
+					chat.sendBroadcastMessage(message);						
 						
-						chat.sendBroadcastMessage(message);
-						System.out.println("alguem");
-						
-					
 					break;
 				case "2":
 					System.out.println("Write your unicast message followed by [ENTER]");
+					s = new Scanner(System.in);
+	    	    	String str2 = s.nextLine();
+	    	    	
+	    	    	System.out.println("Write your target name followed by [ENTER]");
+					s = new Scanner(System.in);
+	    	    	String strTarget = s.nextLine();
+	    	    	
+	    	    	Date date2 = new Date();
+	    	    	message.setDate(date2);
+					message.setMessage(str2);
+					UserInterface target = new User();
+					target.setName(strTarget);					
+					
+					if(!chat.sendUnicastMessage(target, message)){
+						System.out.println("[SYSTEM] - User does't exist. Try again!");
+					}
 					break;
 				case "3":
 					System.out.println("WHOSTHERE");
@@ -112,28 +126,10 @@ Runnable messagerThread = new Runnable(){
 					while(connected){
 						received = chat.getMessages(user);					
 						Iterator<MessageInterface> it = received.iterator();
+						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 						while(it.hasNext()){
 							MessageInterface message = it.next();
-							switch (message.getType()) {
-							case BROADCAST:
-								DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-								System.out.println("["+message.getUser().getName()+"] - "+message.getMessage()+" - "+dateFormat.format(message.getDate()));
-								break;
-							case UNICAST:
-								
-								break;
-							case SHUTDOWN:
-								
-								break;
-							case WHOSTHERE:
-								
-								break;
-							
-							default:
-								
-								System.out.println(message.getMessage());
-								break;
-							}						
+							System.out.println("["+message.getUser().getName()+"] - "+message.getMessage()+" - "+dateFormat.format(message.getDate()));		
 						}
 					
 					}
