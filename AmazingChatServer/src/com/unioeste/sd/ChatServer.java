@@ -44,23 +44,25 @@ public class ChatServer extends Thread {
             threadCounter++;
     		Thread threadM = new Thread(messagerThread,"messager "+threadCounter);
             threadM.start();
-            System.out.println("[SYSTEM] - Type \t [1]to broadcast \t[2]to unicast \t[3]to WHO'S there \t[4]shutdown");
-            while(connected){            	
+            
+            while(connected){
+            	System.out.println("[SYSTEM]-Type: [1]to broadcast \t[2]to unicast \t[3]to WHO'S there \t[4]shutdown");
     	    	Scanner s = new Scanner(System.in);
     	    	String choice = s.nextLine();
     	    	switch (choice) {
 				case "1":
 					System.out.println("Write your broadcas message followed by [ENTER]");
-					synchronized (chat){
+					
 						s = new Scanner(System.in);
 		    	    	String str = s.nextLine();
 		    	    	/*DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		    	    	dateFormat.format(date);*/
 		    	    	Date date = new Date();
 		    	    	message.setDate(date);
-						message.setMessage(str);
-						chat.sendBroadcastMessage(message, user);
-					}
+						message.setMessage(str);				
+						chat.sendBroadcastMessage(message);
+						
+					
 					break;
 				case "2":
 					System.out.println("Write your Unicast message followed by [ENTER]");
@@ -69,8 +71,8 @@ public class ChatServer extends Thread {
 					System.out.println("WHOSTHERE");
 					break;
 				case "4":
-					System.out.println("connected");
-					connected = true;
+					System.out.println("SHUTTING DOWN");
+					connected = false;
 					break;
 				default:
 					System.out.println("[SYSTEM]-Please chose one of the options followed by [ENTER]");
@@ -92,7 +94,7 @@ public class ChatServer extends Thread {
 		
 		public void run(){
 			
-			synchronized (chat){	
+		
 				try {
 					
 					MessageInterface received;
@@ -100,7 +102,7 @@ public class ChatServer extends Thread {
 					
 					while(connected){
 						chat.readServerMessages();
-						chat.wait();
+						
 						
 						/*switch (chat.getMessage().getType()) {
 						case BROADCAST:
@@ -126,12 +128,9 @@ public class ChatServer extends Thread {
 				} catch (RemoteException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				} 
 				
 			}
-		}
+		//}
 	};
 }

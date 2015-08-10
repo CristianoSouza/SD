@@ -5,6 +5,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.unioeste.sd.facade.MessageInterface;
 import com.unioeste.sd.facade.UserInterface;
@@ -23,14 +24,14 @@ public class Message extends UnicastRemoteObject implements MessageInterface{
 	
 	public Message() throws RemoteException {
 		super();
-		this.targets = new ArrayList<UserInterface>();
+		this.targets = new CopyOnWriteArrayList<UserInterface>();
         this.status = MessageInterface.Status.UNREAD;
         this.user = new User();
 	}
 	public Message(UserInterface user) throws RemoteException {
         super();
         this.user = user;
-        this.targets = new ArrayList<UserInterface>();
+        this.targets = new CopyOnWriteArrayList<UserInterface>();
         this.status = MessageInterface.Status.UNREAD;
     }
 	@Override

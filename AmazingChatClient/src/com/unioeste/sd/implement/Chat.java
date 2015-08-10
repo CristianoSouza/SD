@@ -22,7 +22,7 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 	private List<UserInterface> users;
 	private List<MessageInterface> messages,serverMessages;
 	private List<String> log;
-	private MessageInterface serverMessage;
+	
 	private ChatInterface client;
 	
 	public Chat() throws RemoteException {
@@ -31,19 +31,19 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
         this.log = new CopyOnWriteArrayList<String>();
         this.messages = new CopyOnWriteArrayList<MessageInterface>();
         this.users = new CopyOnWriteArrayList<UserInterface>();
-        this.serverMessage = new Message();
+       
     }
 	
 	@Override
 	public synchronized boolean login(UserInterface user) throws RemoteException {
         if(!users.isEmpty()){
         	for(UserInterface login: users){
-        		if(login.getName().equals(user.getName())){        			
-        			System.out.println("[SYSTEM] - login name already exists. Chose another");        		
-            		notify();
+        		if(login.getName().equals(user.getName())){        			        			   
+        			notifyAll();
             		return false;
         		}
         	}
+        	MessageInterface serverMessage;
 	        serverMessage = new Message(user);
 	        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 	        Date date = new Date();
@@ -51,9 +51,10 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 	        serverMessage.setDate(date);
 	        serverMessage.setMessage("[SYSTEM] User [" + user.getName() + "] is now online - "+dateFormat.format(date));   
 	        serverMessages.add(serverMessage);
-	        notify();
+	        notifyAll();
 	        return true;
         }
+        MessageInterface serverMessage;
         serverMessage = new Message(user);
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
@@ -61,7 +62,7 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
         serverMessage.setDate(date);
         serverMessage.setMessage("[SYSTEM] User [" + user.getName() + "] is now online - "+dateFormat.format(date));   
         serverMessages.add(serverMessage);
-        notify();
+        notifyAll();
         return true;
 	}
 
@@ -72,16 +73,17 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 	}
 
     @Override
-    public void sendBroadcastMessage(MessageInterface serverMessage, UserInterface from) throws RemoteException {
+    public synchronized void sendBroadcastMessage(MessageInterface serverMessage) throws RemoteException {
     	DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        System.out.println("["+from.getName()+"] - "+serverMessage.getMessage()+" - "+dateFormat.format(serverMessage.getDate()));
-        this.serverMessage = serverMessage;
-        this.serverMessage.setUser(from);
-        for(UserInterface user: users){
-        	this.serverMessage.addTarget(user);
+        Iterator<UserInterface> it = users.iterator();
+		while(it.hasNext()){
+			UserInterface user = it.next();
+        	serverMessage.addTarget(user);
         }
-        this.serverMessages.add(serverMessage);
-        notify();
+		serverMessage.setType(MessageInterface.Type.BROADCAST);
+		
+			this.serverMessages.add(serverMessage);
+			notifyAll();
     }
 
     @Override
@@ -90,7 +92,7 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
     }
 
 	@Override
-	public UserInterface[] getLoggedUsers() throws RemoteException {
+	public synchronized UserInterface[] getLoggedUsers() throws RemoteException {
 		UserInterface[] userArray = new UserInterface[users.size()];
 		userArray = (UserInterface[]) users.toArray(userArray);
 		return (userArray);
@@ -117,15 +119,15 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 		this.client = client;
 	}
 
-	@Override
+	/*@Override
 	public MessageInterface getMessage() throws RemoteException {
 		// TODO Auto-generated method stub
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		System.out.println("["+serverMessage.getUser().getName()+"] - "+serverMessage.getMessage()+" - "+dateFormat.format(serverMessage.getDate()));
 		return this.serverMessage;
-	}
+	}*/
 	@Override
-	public void readServerMessages() throws RemoteException{
+	public synchronized void readServerMessages() throws RemoteException{
 		
 		Iterator<MessageInterface> it = serverMessages.iterator();
 		while(it.hasNext()){
@@ -134,7 +136,10 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 			switch (message.getType()) {
 			case BROADCAST:
 				messages.add(message);
-				System.out.println(message.getMessage());
+				if(!message.getUser().getName().equals("SERVER")){
+					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+					System.out.println("["+message.getUser().getName()+"] - "+message.getMessage()+" - "+dateFormat.format(message.getDate()));
+				}
 				serverMessages.remove(message);
 				break;
 			case UNICAST:
@@ -152,12 +157,15 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 				break;
 			}
 		}
+		notifyAll();
 	}
 
 	@Override
-	public void readMessages(UserInterface user) throws RemoteException {
+	public synchronized void readMessages(UserInterface user) throws RemoteException {
 		// TODO Auto-generated method stub
-		for(MessageInterface message: messages){
+		Iterator<MessageInterface> it = messages.iterator();
+		while(it.hasNext()){
+			MessageInterface message = it.next();
 			switch (message.getType()) {
 			case BROADCAST:
 				List<UserInterface> targets = message.getTarget();				
@@ -178,6 +186,44 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 				break;
 			}
 		}
+		notifyAll();
+	}
+
+	@Override
+	public synchronized List<MessageInterface> getMessages(UserInterface user) throws RemoteException {
+		// TODO Auto-generated method stub
+		Iterator<MessageInterface> it = messages.iterator();
+		List<MessageInterface> userMessages = new CopyOnWriteArrayList<MessageInterface>();
+		while(it.hasNext()){
+			MessageInterface message = it.next();
+			switch (message.getType()) {
+			case BROADCAST:
+				List<UserInterface> targets = message.getTarget();				
+				if (!targets.isEmpty()) {
+					Iterator<UserInterface> itTarget = targets.iterator();
+					while(itTarget.hasNext()){
+					UserInterface target = itTarget.next();
+						if(target.getName().equals(user.getName())){											
+							userMessages.add(message);
+							message.removeTarget(user);
+							log.add("[READ]["+user.getName()+"] - "+message.getMessage());
+							if(message.getTarget().isEmpty()){								
+								messages.remove(message);
+							}else{
+								messages.remove(message);
+								messages.add(message);
+							}
+						}
+					}
+				}
+				break;
+
+			default:
+				break;
+			}
+		}
+		notifyAll();
+		return userMessages;
 	}
 	
 }
