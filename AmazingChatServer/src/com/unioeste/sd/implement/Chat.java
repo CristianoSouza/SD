@@ -23,19 +23,20 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 
         this.users = new ArrayList<UserInterface>();
     }
-
+	
 	@Override
-	public void login(UserInterface user) throws RemoteException {
+	public synchronized void login(UserInterface user) throws RemoteException {
         this.users.add(user);
-
-		System.out.println("User " + user.getName() + " is now logged in");
-
+        message = new Message(user);
+        message.setMessage("User [" + user.getName() + "] is now online");
+        
+		notify();
 
 	}
 
 	@Override
 	public void logout(UserInterface user) throws RemoteException {
-		System.out.println("User " + user.getName() + "has left");
+		System.out.println("[SYSTEM]User " + user.getName() + "has left");
 		this.users.remove(user);
 	}
 

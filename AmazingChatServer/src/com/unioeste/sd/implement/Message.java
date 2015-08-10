@@ -22,7 +22,10 @@ public class Message extends UnicastRemoteObject implements MessageInterface{
 	public Message() throws RemoteException {
 		super();
 	}
-	
+	public Message(UserInterface user) throws RemoteException {
+        super();
+        this.user = user;
+    }
 	@Override
 	public UserInterface getUser() {
 		return user;

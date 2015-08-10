@@ -15,7 +15,7 @@ import com.unioeste.sd.implement.User;
 public class ChatServer extends Thread {
 	
 	Chat chat;
-	private boolean shutdown = false;
+	private boolean connected = true;
 	
 	public ChatServer(){
 		int threadCounter =0;
@@ -23,22 +23,18 @@ public class ChatServer extends Thread {
 			java.rmi.registry.LocateRegistry.createRegistry(1099);
 			chat = new Chat();
 			Naming.rebind("rmi://localhost/ABCD", chat);
-
-            
-            
+			System.out.println("[SYSTEM] Chat Server is ready.");
             synchronized (chat){
         		if (chat.getLoggedUsers()!=null){
         			System.out.println("No Users Online");
         			chat.wait();
-    				
-    			}
-        		System.out.println(chat.getMessage());
-        		threadCounter++;
-        		new Thread(messagerThread,"messager "+threadCounter);
+    			}  		
         	}
-            System.out.println("[SYSTEM] Chat Server is ready.");
-            System.out.println("[SYSTEM] - Type \t [1]to broadcast \t[2]to unicast \t[3]to WHO'S there \t[4]SHUTDOWN");
-            while(shutdown){            	
+            threadCounter++;
+    		Thread threadM = new Thread(messagerThread,"messager "+threadCounter);
+            threadM.start();
+            System.out.println("[SYSTEM] - Type \t [1]to broadcast \t[2]to unicast \t[3]to WHO'S there \t[4]connected");
+            while(connected){            	
     	    	Scanner s = new Scanner(System.in);
     	    	String choice = s.nextLine();
     	    	switch (choice) {
@@ -52,8 +48,8 @@ public class ChatServer extends Thread {
 					System.out.println("WHOSTHERE");
 					break;
 				case "4":
-					System.out.println("SHUTDOWN");
-					shutdown = true;
+					System.out.println("connected");
+					connected = true;
 					break;
 				default:
 					System.out.println("[SYSTEM]-Please chose one of the options followed by [ENTER]");
@@ -74,16 +70,22 @@ public class ChatServer extends Thread {
 	Runnable messagerThread = new Runnable(){
 		
 		public void run(){
+			
 			synchronized (chat){	
 				try {
 					
 					String received;
 					ChatInterface client = chat.getClient();
 					
-					while(shutdown){
-						System.out.println(chat.getMessage());
+					while(connected){
+						
+						System.out.println(chat.getMessage().getMessage());
+						chat.wait();
 					}
 				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
