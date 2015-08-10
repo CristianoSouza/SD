@@ -6,20 +6,31 @@ import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 import com.unioeste.sd.facade.ChatInterface;
+import com.unioeste.sd.facade.MessageInterface;
+import com.unioeste.sd.facade.UserInterface;
 import com.unioeste.sd.implement.Chat;
+import com.unioeste.sd.implement.Message;
 import com.unioeste.sd.implement.User;
 
 public class ChatServer extends Thread {
 	
-	Chat chat;
+	ChatInterface chat;
 	private boolean connected = true;
+	UserInterface user;
+	MessageInterface message;
 	
 	public ChatServer(){
 		int threadCounter =0;
 		try {
+			user = new User();
+			user.setName("SERVER");
+			message = new Message(user);
 			java.rmi.registry.LocateRegistry.createRegistry(1099);
 			chat = new Chat();
 			Naming.rebind("rmi://localhost/ABCD", chat);
@@ -33,16 +44,26 @@ public class ChatServer extends Thread {
             threadCounter++;
     		Thread threadM = new Thread(messagerThread,"messager "+threadCounter);
             threadM.start();
-            System.out.println("[SYSTEM] - Type \t [1]to broadcast \t[2]to unicast \t[3]to WHO'S there \t[4]connected");
+            System.out.println("[SYSTEM] - Type \t [1]to broadcast \t[2]to unicast \t[3]to WHO'S there \t[4]shutdown");
             while(connected){            	
     	    	Scanner s = new Scanner(System.in);
     	    	String choice = s.nextLine();
     	    	switch (choice) {
 				case "1":
-					System.out.println("BROADCAST");
+					System.out.println("Write your broadcas message followed by [ENTER]");
+					synchronized (chat){
+						s = new Scanner(System.in);
+		    	    	String str = s.nextLine();
+		    	    	/*DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		    	    	dateFormat.format(date);*/
+		    	    	Date date = new Date();
+		    	    	message.setDate(date);
+						message.setMessage(str);
+						chat.sendBroadcastMessage(message, user);
+					}
 					break;
 				case "2":
-					System.out.println("UNICAST");
+					System.out.println("Write your Unicast message followed by [ENTER]");
 					break;
 				case "3":
 					System.out.println("WHOSTHERE");
@@ -74,13 +95,33 @@ public class ChatServer extends Thread {
 			synchronized (chat){	
 				try {
 					
-					String received;
+					MessageInterface received;
 					ChatInterface client = chat.getClient();
 					
 					while(connected){
-						
-						System.out.println(chat.getMessage().getMessage());
+						chat.readServerMessages();
 						chat.wait();
+						
+						/*switch (chat.getMessage().getType()) {
+						case BROADCAST:
+							
+							break;
+						case UNICAST:
+							
+							break;
+						case SHUTDOWN:
+							
+							break;
+						case WHOSTHERE:
+							
+							break;
+						
+						default:
+							DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+							System.out.println("["+received.getUser()+"] "+received.getMessage()+" - "+dateFormat.format(received.getDate()));
+							break;
+						}*/
+						
 					}
 				} catch (RemoteException e) {
 					// TODO Auto-generated catch block

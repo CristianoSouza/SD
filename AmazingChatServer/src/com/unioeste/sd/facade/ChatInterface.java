@@ -6,7 +6,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface ChatInterface extends Remote{
-	public void login(UserInterface user) throws RemoteException;
+	public boolean login(UserInterface user) throws RemoteException;
 	public void logout(UserInterface user) throws RemoteException;
 	public void sendBroadcastMessage(MessageInterface message,UserInterface from) throws RemoteException;
 	public void sendUnicastMessage(UserInterface target,UserInterface from, MessageInterface message) throws RemoteException;
@@ -14,5 +14,7 @@ public interface ChatInterface extends Remote{
 	public void notifyChange() throws RemoteException;
 	public ChatInterface getClient() throws RemoteException;
 	public void setClient(ChatInterface client) throws RemoteException;
-	public Message getMessage();
+	public MessageInterface getMessage() throws RemoteException;
+	public void readServerMessages() throws RemoteException;
+	public void readMessages(UserInterface user) throws RemoteException;
 }

@@ -2,29 +2,36 @@ package com.unioeste.sd.implement;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import com.unioeste.sd.facade.MessageInterface;
 import com.unioeste.sd.facade.UserInterface;
 
 public class Message extends UnicastRemoteObject implements MessageInterface{
 
-	public static enum Type {
-		UNICAST, BROADCAST
-	}
+	
 	
 	private static final long serialVersionUID = 1L;
 	private UserInterface user;
 	private String message;
 	private Date date;
 	private Type type; 
+	private Status status;
+	private List<UserInterface> targets;
 	
 	public Message() throws RemoteException {
 		super();
+		this.targets = new ArrayList<UserInterface>();
+        this.status = MessageInterface.Status.UNREAD;
+        this.user = new User();
 	}
 	public Message(UserInterface user) throws RemoteException {
         super();
         this.user = user;
+        this.targets = new ArrayList<UserInterface>();
+        this.status = MessageInterface.Status.UNREAD;
     }
 	@Override
 	public UserInterface getUser() {
@@ -36,6 +43,15 @@ public class Message extends UnicastRemoteObject implements MessageInterface{
 		this.user = user;
 	}
 
+	@Override
+	public List<UserInterface> getTarget() {
+		return targets;
+	}
+	
+	@Override
+	public void setTarget(List<UserInterface> targets) {
+		this.targets = targets;
+	}
 	@Override
 	public String getMessage() {
 		return message;
@@ -64,5 +80,21 @@ public class Message extends UnicastRemoteObject implements MessageInterface{
 	@Override
 	public void setType(Type type) {
 		this.type = type;
+	}
+	@Override
+	public Status getStatus() throws RemoteException {
+		// TODO Auto-generated method stub
+		return status;
+	}
+	@Override
+	public void setStatus(Status status) throws RemoteException {
+		// TODO Auto-generated method stub
+		this.status = status;
+	}
+	public void addTarget(UserInterface target){
+		this.targets.add(target);
+	}
+	public void removeTarget(UserInterface target){
+		this.targets.remove(target);
 	}
 }
