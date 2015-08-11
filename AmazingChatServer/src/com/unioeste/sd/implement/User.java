@@ -52,4 +52,9 @@ public class User extends UnicastRemoteObject implements FacadeUser {
 	public void receive(FacadeMessage message) throws RemoteException {
 		System.out.println(message.getUser() + ": " + message.getMessage());
 	}
+	
+	@Override
+	public String toString() {
+		return name;		
+	}
 }
