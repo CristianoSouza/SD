@@ -1,6 +1,6 @@
 package com.unioeste.sd.implement;
 
-import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -12,7 +12,7 @@ public class User extends UnicastRemoteObject implements FacadeUser {
 	private static final long serialVersionUID = 1L;
 	private String name;
 	private String status;
-	private Inet4Address ip; 
+	private InetAddress ip; 
 
 	public User() throws RemoteException {
 		super();
@@ -39,12 +39,12 @@ public class User extends UnicastRemoteObject implements FacadeUser {
 	}
 
 	@Override
-	public Inet4Address getIp() {
+	public InetAddress getIp() {
 		return ip;
 	}
 
 	@Override
-	public void setIp(Inet4Address ip) {
+	public void setIp(InetAddress ip) {
 		this.ip = ip;
 	}
 
@@ -56,5 +56,10 @@ public class User extends UnicastRemoteObject implements FacadeUser {
 	@Override
 	public String toString() {
 		return name;		
+	}
+	
+	public boolean equals(Object user){
+		System.out.println("comparing objects");
+		return this.name.equals(((User)user).getName());
 	}
 }

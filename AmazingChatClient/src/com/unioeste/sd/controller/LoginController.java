@@ -1,5 +1,7 @@
 package com.unioeste.sd.controller;
 
+import java.net.Inet4Address;
+
 import com.unioeste.sd.ChatClient;
 import com.unioeste.sd.facade.FacadeUser;
 import com.unioeste.sd.infra.Register;
@@ -31,6 +33,7 @@ public class LoginController implements Controller{
 			try{
 				FacadeUser user = register.getUserInstance();
 				user.setName(username.getText());
+				user.setIp(Inet4Address.getLocalHost());
 				this.client.setUser(user);
 				
 				this.client.authenticated(username.getText());

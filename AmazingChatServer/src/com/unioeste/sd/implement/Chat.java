@@ -22,8 +22,12 @@ public class Chat extends UnicastRemoteObject implements FacadeChat {
 
 	@Override
 	public void login(FacadeUser user) throws RemoteException {
-		System.out.println("User " + user.getName() + " is now logged in");
-		this.users.add(user);
+		if(!this.users.contains(user)){
+			System.out.println("User " + user.getName() + " is now online");
+			this.users.add(user);
+		} else {
+			System.out.println("This user is currently online");
+		}
 	}
 
 	@Override

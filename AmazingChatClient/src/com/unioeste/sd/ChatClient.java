@@ -3,8 +3,6 @@ package com.unioeste.sd;
 import java.io.IOException;
 
 import com.unioeste.sd.controller.Controller;
-import com.unioeste.sd.controller.LoginController;
-import com.unioeste.sd.controller.MainController;
 import com.unioeste.sd.facade.FacadeChat;
 import com.unioeste.sd.facade.FacadeUser;
 
@@ -26,40 +24,27 @@ public class ChatClient extends Application {
 		this.stage = primaryStage;
 		this.scene = new Scene(new StackPane());
 		
-		this.showScreen("view/Login.fxml", new LoginController());
+		this.showScreen("view/Login.fxml");
 		
 		stage.setScene(scene);
 	    stage.show();
 	}
 	
 	public void authenticated(String sessionID) {
-		showMainView();
+		showScreen("view/Main.fxml");
 	}
 
 	public void logout() {
-		showScreen("view/Login.fxml", new LoginController());
+		showScreen("view/Login.fxml");
 	}
 	  
-	public void showScreen(String resource, Controller controller) {
+	public void showScreen(String resource) {
 		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("view/Login.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
 			scene.setRoot((Parent) loader.load());
 			stage.sizeToScene();
 			stage.centerOnScreen();
-			LoginController controller = loader.<LoginController>getController();
-			controller.initManager(this);
-	    } catch(IOException e) {
-	    	e.printStackTrace();
-	    }
-	}
-	
-	private void showMainView() {
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("view/Main.fxml"));
-			scene.setRoot((Parent) loader.load());
-			stage.sizeToScene();
-			stage.centerOnScreen();
-			MainController controller = loader.<MainController>getController();
+			Controller controller = loader.getController();
 			controller.initManager(this);
 	    } catch(IOException e) {
 	    	e.printStackTrace();
