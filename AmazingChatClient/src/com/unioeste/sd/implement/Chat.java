@@ -22,7 +22,7 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 	private List<UserInterface> users;
 	private List<MessageInterface> messages,serverMessages;
 	private List<String> log;
-	
+	DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	private ChatInterface client;
 	
 	public Chat() throws RemoteException {
@@ -44,8 +44,7 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
         		}
         	}
         	MessageInterface serverMessage;
-	        serverMessage = new Message(user);
-	        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+	        serverMessage = new Message(user);	        
 	        Date date = new Date();
 	        serverMessage.setType(MessageInterface.Type.LOGIN);
 	        serverMessage.setDate(date);
@@ -56,7 +55,7 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
         }
         MessageInterface serverMessage;
         serverMessage = new Message(user);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        
         Date date = new Date();
         serverMessage.setType(MessageInterface.Type.LOGIN);
         serverMessage.setDate(date);
@@ -67,9 +66,19 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 	}
 
 	@Override
-	public void logout(UserInterface user) throws RemoteException {
-		System.out.println("[SYSTEM]User " + user.getName() + "has left");
-		this.users.remove(user);
+	public synchronized void logout(UserInterface user) throws RemoteException {
+		MessageInterface lastMessage = new Message(user);
+		lastMessage.setType(MessageInterface.Type.SHUTDOWN);
+		lastMessage.setMessage("[SERVER] - Server is Shutting Down. GoodBye!");
+		Date date = new Date();
+		lastMessage.setDate(date);
+		Iterator<UserInterface> it = users.iterator();
+		while(it.hasNext()){
+			UserInterface target = it.next();
+        	lastMessage.addTarget(target);
+        }
+		this.serverMessages.add(lastMessage);
+		notifyAll();
 	}
 
     @Override
@@ -111,15 +120,6 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 	}
 
 	@Override
-	public void notifyChange() throws RemoteException {
-		for(UserInterface listener : users){
-			synchronized (listener) {
-				listener.notify();
-			}
-		}
-	}
-
-	@Override
 	public ChatInterface getClient() throws RemoteException {
 		// TODO Auto-generated method stub
 		return this.client;
@@ -130,17 +130,10 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 		// TODO Auto-generated method stub
 		this.client = client;
 	}
-
-	/*@Override
-	public MessageInterface getMessage() throws RemoteException {
-		// TODO Auto-generated method stub
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		System.out.println("["+serverMessage.getUser().getName()+"] - "+serverMessage.getMessage()+" - "+dateFormat.format(serverMessage.getDate()));
-		return this.serverMessage;
-	}*/
+	
 	@Override
 	public synchronized void readServerMessages(UserInterface user) throws RemoteException{
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		
 		Iterator<MessageInterface> it = serverMessages.iterator();
 		while(it.hasNext()){
 			MessageInterface message = it.next();
@@ -160,29 +153,45 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 				}
 				serverMessages.remove(message);
 				break;
-			case SHUTDOWN:				
+			case LOGOUT:				
 				System.out.println("["+message.getUser().getName()+"] - "+message.getMessage()+" - "+dateFormat.format(message.getDate()));
 				users.remove(message.getUser());
 				serverMessages.remove(message);
+				message.setMessage("[SYSTEM]User [" + message.getUser().getName() + "] has left");
+				sendBroadcastMessage(message);
+				break;
+			case SHUTDOWN:
+				messages.add(message);
+				serverMessages.remove(message);
 				break;
 			case WHOSTHERE:
-				MessageInterface newMessage = new Message(user);
-				newMessage.setStatus(MessageInterface.Status.UNREAD);
+				MessageInterface newMessage = new Message(message.getUser());
+				newMessage.setType(MessageInterface.Type.UNICAST);
 				Iterator<UserInterface> iTWho = users.iterator();
 				String str = new String();
 				while(iTWho.hasNext()){
 					UserInterface who = iTWho.next();
-					str+=who.getName()+" ";
+					str+="["+who.getName()+"] ";
 				}
+				newMessage.setDate(message.getDate());
 				System.out.println("["+message.getUser().getName()+"] - "+message.getMessage()+" - "+dateFormat.format(message.getDate()));
 				newMessage.setMessage("[SERVER]-Usuarios on-line: "+str);
-				sendUnicastMessage(message.getUser(), newMessage);
+				if(!message.getUser().getName().equals("SERVER")){
+					System.out.println("["+message.getUser().getName()+"] - "+message.getMessage()+" - "+dateFormat.format(message.getDate()));
+					System.out.println("["+newMessage.getUser().getName()+"] - "+newMessage.getMessage()+" - "+dateFormat.format(newMessage.getDate()));
+				}else
+					sendUnicastMessage(message.getUser(), newMessage);
+				log.add("[WHO]["+message.getUser().getName()+"] - "+message.getMessage());
 				serverMessages.remove(message);
 				break;
 			case LOGIN:
 				this.users.add(message.getUser());
 				System.out.println(message.getMessage());
+				log.add("[LOGIN]["+message.getUser().getName()+"] - "+message.getMessage());
 				serverMessages.remove(message);
+				message.setMessage("[SYSTEM]User [" + message.getUser().getName() + "] is in the room");
+				message.setType(MessageInterface.Type.BROADCAST);
+				sendBroadcastMessage(message);
 				break;
 			default:
 				break;
@@ -219,7 +228,24 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 					}
 				}
 				break;
-
+			case UNICAST:
+				List<UserInterface> targets1 = message.getTarget();				
+				if (!targets1.isEmpty()) {
+					Iterator<UserInterface> itTarget = targets1.iterator();
+					while(itTarget.hasNext()){
+						UserInterface target = itTarget.next();
+						if(target.getName().equals(user.getName())){	
+							userMessages.add(message);
+							log.add("[READ]["+user.getName()+"] - "+message.getMessage());
+							messages.remove(message);
+						}
+					}
+				}
+				break;
+			case SHUTDOWN:
+				log.add("[SHUTDOWN]["+user.getName()+"] - "+message.getMessage());				
+				messages.remove(message);
+				userMessages.add(message);
 			default:
 				break;
 			}
@@ -229,10 +255,24 @@ public class Chat extends UnicastRemoteObject implements ChatInterface {
 	}
 
 	@Override
-	public void sendWho(MessageInterface serverMessage) throws RemoteException {
+	public synchronized void sendWho(MessageInterface serverMessage) throws RemoteException {
 		// TODO Auto-generated method stub
 		
         serverMessage.setType(MessageInterface.Type.WHOSTHERE);
+        Date date = new Date();
+        serverMessage.setDate(date);
+        serverMessage.setMessage("WHO's THERE?");
+		this.serverMessages.add(serverMessage);
+		notifyAll();
+	}
+
+	@Override
+	public synchronized void sendLogout(MessageInterface serverMessage) throws RemoteException {
+		// TODO Auto-generated method stub
+		serverMessage.setType(MessageInterface.Type.LOGOUT);
+		Date date = new Date();
+        serverMessage.setDate(date);
+        serverMessage.setMessage("LOGOUT!");
 		this.serverMessages.add(serverMessage);
 		notifyAll();
 	}

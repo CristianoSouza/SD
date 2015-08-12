@@ -20,11 +20,12 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ChatClient {
+public class ChatClient extends Thread{
 	ChatInterface chat;
 	boolean connected = true;
 	UserInterface user;
 	MessageInterface message;
+	DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	
     public ChatClient() {
     	
@@ -42,9 +43,7 @@ public class ChatClient {
                     
                     String username = scanner.nextLine();
                     user = new User();
-                    user.setName(username);
-                    message = new Message();
-                    message.setUser(user);
+                    user.setName(username);                   
                     count++;
             	}while(!chat.login(user));
             	
@@ -55,7 +54,7 @@ public class ChatClient {
             System.out.println("[System] Client Messenger is running...");
            
             while(connected){
-            	System.out.println("[SYSTEM] - Type \t [1]to broadcast \t[2]to unicast \t[3]to WHO'S there \t[4]shutdown");
+            	System.out.println("[SYSTEM] - Type \t [1]to broadcast \t[2]to unicast \t[3]to WHO'S there \t[4]logout");
     	    	Scanner s = new Scanner(System.in);
     	    	String choice = s.nextLine();
     	    	switch (choice) {
@@ -64,6 +63,7 @@ public class ChatClient {
 					s = new Scanner(System.in);
 	    	    	String str = s.nextLine();
 	    	    	
+	    	    	message = new Message(user);
 	    	    	Date date = new Date();
 	    	    	message.setDate(date);
 					message.setMessage(str);
@@ -80,6 +80,7 @@ public class ChatClient {
 					s = new Scanner(System.in);
 	    	    	String strTarget = s.nextLine();
 	    	    	
+	    	    	message = new Message(user);
 	    	    	Date date2 = new Date();
 	    	    	message.setDate(date2);
 					message.setMessage(str2);
@@ -87,29 +88,39 @@ public class ChatClient {
 					target.setName(strTarget);					
 					
 					if(!chat.sendUnicastMessage(target, message)){
-						System.out.println("[SYSTEM] - User does't exist. Try again!");
+						System.out.println("[SYSTEM] - User is not online. Try again!");
 					}
 					break;
-				case "3":
+				case "3":					
+					message =new Message(user);
+					chat.sendWho(message);				
 					System.out.println("WHOSTHERE");
+					
 					break;
-				case "4":
-					System.out.println("connected");
-					connected = true;
+				case "4":				
+					message = new Message(user);
+					chat.sendLogout(message);
+					connected = false;
+					System.out.println("[SYSTEM] - Bye!");
 					break;
 				default:
 					System.out.println("[SYSTEM]-Please chose one of the options followed by [ENTER]");
 					break;
 				}
             }
-            
+            Thread.sleep(2000);
+            System.exit(0);
         }catch (RemoteException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("[SYSTEM] - Server is OFFLINE");
+			System.exit(0);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
@@ -126,14 +137,22 @@ Runnable messagerThread = new Runnable(){
 					while(connected){
 						received = chat.getMessages(user);					
 						Iterator<MessageInterface> it = received.iterator();
-						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+						
 						while(it.hasNext()){
 							MessageInterface message = it.next();
-							System.out.println("["+message.getUser().getName()+"] - "+message.getMessage()+" - "+dateFormat.format(message.getDate()));		
-						}
-					
+							System.out.println("["+message.getUser().getName()+"] - "+message.getMessage()+" - "+dateFormat.format(message.getDate()));
+							if(message.getType()==MessageInterface.Type.SHUTDOWN){
+								connected = false;
+							}
+						}					
 					}
+					Thread.sleep(2000);
+					System.exit(0);
 				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					System.out.println("[SYSTEM] - Server is OFFLINE");
+					System.exit(0);
+				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} 				

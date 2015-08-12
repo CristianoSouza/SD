@@ -10,7 +10,7 @@ import java.util.List;
 public interface MessageInterface extends Remote{
 	
 	public static enum Type {
-		UNICAST, BROADCAST, SHUTDOWN, WHOSTHERE, LOGIN
+		UNICAST, BROADCAST, SHUTDOWN, WHOSTHERE, LOGIN, LOGOUT
 	}
 	public static enum Status {
 		UNREAD, READ

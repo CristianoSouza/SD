@@ -24,7 +24,7 @@ public class ChatServer extends Thread {
 	private boolean connected = true;
 	UserInterface user;
 	MessageInterface message;
-
+	DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	public ChatServer(){
 		int threadCounter =0;
 		try {
@@ -55,8 +55,6 @@ public class ChatServer extends Thread {
 
 					s = new Scanner(System.in);
 					String str = s.nextLine();
-					/*DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		    	    	dateFormat.format(date);*/
 					Date date = new Date();
 					message.setDate(date);
 					message.setMessage(str);				
@@ -65,20 +63,45 @@ public class ChatServer extends Thread {
 
 					break;
 				case "2":
-					System.out.println("Write your Unicast message followed by [ENTER]");
+					System.out.println("Write your unicast message followed by [ENTER]");
+					s = new Scanner(System.in);
+	    	    	String str2 = s.nextLine();
+	    	    	
+	    	    	System.out.println("Write your target name followed by [ENTER]");
+					s = new Scanner(System.in);
+	    	    	String strTarget = s.nextLine();
+	    	    	
+	    	    	message = new Message(user);
+	    	    	Date date2 = new Date();
+	    	    	message.setDate(date2);
+					message.setMessage(str2);
+					UserInterface target = new User();
+					target.setName(strTarget);					
+					
+					if(!chat.sendUnicastMessage(target, message)){
+						System.out.println("[SYSTEM] - User is not online. Try again!");
+					}
 					break;
-				case "3":
+				case "3":					
+					message =new Message(user);
+					chat.sendWho(message);				
 					System.out.println("WHOSTHERE");
+					
 					break;
 				case "4":
-					System.out.println("SHUTTING DOWN");
+					
+					message = new Message(user);
+					chat.logout(user);
 					connected = false;
+					System.out.println("[SYSTEM] - Bye!");
 					break;
 				default:
 					System.out.println("[SYSTEM]-Please chose one of the options followed by [ENTER]");
 					break;
 				}
 			}
+			Thread.sleep(5000);
+			System.exit(0);
 		} catch (RemoteException e) {
 			System.out.println("Chat Server Failed");
 			e.printStackTrace();
@@ -96,34 +119,8 @@ public class ChatServer extends Thread {
 
 
 			try {
-
-				MessageInterface received;
-				ChatInterface client = chat.getClient();
-
 				while(connected){
-					chat.readServerMessages(user);
-
-
-					/*switch (chat.getMessage().getType()) {
-						case BROADCAST:
-
-							break;
-						case UNICAST:
-
-							break;
-						case SHUTDOWN:
-
-							break;
-						case WHOSTHERE:
-
-							break;
-
-						default:
-							DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-							System.out.println("["+received.getUser()+"] "+received.getMessage()+" - "+dateFormat.format(received.getDate()));
-							break;
-						}*/
-
+					chat.readServerMessages(user);					
 				}
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
