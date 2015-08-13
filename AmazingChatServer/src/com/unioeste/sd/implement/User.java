@@ -57,9 +57,4 @@ public class User extends UnicastRemoteObject implements FacadeUser {
 	public String toString() {
 		return name;		
 	}
-	
-	public boolean equals(Object user){
-		System.out.println("comparing objects");
-		return this.name.equals(((User)user).getName());
-	}
 }

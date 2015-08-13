@@ -7,10 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import com.unioeste.sd.ChatClient;
-import com.unioeste.sd.exception.ChatException;
-import com.unioeste.sd.facade.FacadeChat;
 import com.unioeste.sd.facade.FacadeUser;
-import com.unioeste.sd.infra.ChatConnector;
 import com.unioeste.sd.misc.UserListCell;
 
 import javafx.application.Platform;
@@ -34,11 +31,6 @@ public class MainController implements Controller{
 	private TabPane chatPane;
 	
 	private ChatClient client;
-	private ChatConnector connector;
-	
-	public MainController() {
-		this.connector = new ChatConnector();
-	}
 	
 	@FXML
 	private void handleExitButtonAction(ActionEvent event){
@@ -49,15 +41,8 @@ public class MainController implements Controller{
 		this.client = chatClient;
 		
 		try {
-			FacadeChat chat = connector.connect(this.client.getUser());
-			this.client.setChat(chat);			
-			
-		} catch (ChatException e) {
-			e.printStackTrace();
-		}
-		
-		try {
 			Collection<FacadeUser> loggedUsers = new ArrayList<FacadeUser>(Arrays.asList(this.client.getChat().getLoggedUsers()));
+			loggedUsers.remove(chatClient.getUser());
 			ObservableList<FacadeUser> items = FXCollections.observableArrayList(loggedUsers);
 			
 			userList.setItems(items);
@@ -68,22 +53,33 @@ public class MainController implements Controller{
 					cell.setOnMouseClicked(new EventHandler<MouseEvent>(){
 						@Override
 						public void handle(MouseEvent event) {
-							if(cell.getText() != null && event.getClickCount() > 1){
-								try {
-									System.out.println(
-										"opening new connection with " + cell.getText() + 
-										" over IP: " + cell.getItem().getIp().getHostAddress()
-									);
-								} catch (RemoteException e) {
-									e.printStackTrace();
+							boolean contains = false;
+							if(cell.getText() != null){
+								for(FacadeUser user : chatClient.getChatList()){
+									try {contains = user.getName().equals(cell.getItem().getName());} catch (RemoteException e) {}
+									if(contains) break;
 								}
 								
-								try {
-									Tab tab = FXMLLoader.load(getClass().getResource("../view/NewChat.fxml"));
-									tab.setClosable(true);
-									chatPane.getTabs().add(tab);
-								} catch (IOException e) {
-									e.printStackTrace();
+								if(!contains && event.getClickCount() > 1){
+									chatClient.getChatList().add(cell.getItem());
+									
+									try {
+										System.out.println(
+											"opening new connection with " + cell.getText() + 
+											" over IP: " + cell.getItem().getIp().getHostAddress()
+										);
+									} catch (RemoteException e) {
+										e.printStackTrace();
+									}
+									
+									try {
+										Tab tab = FXMLLoader.load(getClass().getResource("../view/NewChat.fxml"));
+										tab.setText(cell.getText());
+										tab.setClosable(true);
+										chatPane.getTabs().add(tab);
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 						}

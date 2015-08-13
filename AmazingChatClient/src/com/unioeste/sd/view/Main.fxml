@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -25,23 +26,12 @@
                                       <items>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                              <children>
-                                                <ScrollPane layoutX="112.0" layoutY="21.0" prefHeight="294.0" prefWidth="554.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                  <content>
-                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-                                                  </content>
-                                                </ScrollPane>
+                                                <TextArea prefHeight="324.0" prefWidth="554.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                              </children>
                                           </AnchorPane>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                              <children>
                                                 <BorderPane layoutX="14.0" layoutY="-57.0" prefHeight="99.0" prefWidth="554.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                   <center>
-                                                      <ScrollPane prefHeight="80.0" prefWidth="554.0" BorderPane.alignment="CENTER">
-                                                        <content>
-                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-                                                        </content>
-                                                      </ScrollPane>
-                                                   </center>
                                                    <bottom>
                                                       <BorderPane prefWidth="200.0" BorderPane.alignment="CENTER">
                                                          <right>
@@ -49,6 +39,9 @@
                                                          </right>
                                                       </BorderPane>
                                                    </bottom>
+                                                   <center>
+                                                      <TextArea prefHeight="200.0" prefWidth="200.0" wrapText="true" BorderPane.alignment="CENTER" />
+                                                   </center>
                                                 </BorderPane>
                                              </children>
                                           </AnchorPane>

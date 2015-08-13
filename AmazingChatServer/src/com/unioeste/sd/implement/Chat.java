@@ -22,11 +22,19 @@ public class Chat extends UnicastRemoteObject implements FacadeChat {
 
 	@Override
 	public void login(FacadeUser user) throws RemoteException {
-		if(!this.users.contains(user)){
+		boolean contains = false;
+		
+		for(FacadeUser u : this.users){
+			contains = u.getName().equals(user.getName());
+			
+			if(contains) break;
+		}
+		
+		if(!contains){
 			System.out.println("User " + user.getName() + " is now online");
 			this.users.add(user);
 		} else {
-			System.out.println("This user is currently online");
+			throw new RemoteException("This user already online");
 		}
 	}
 

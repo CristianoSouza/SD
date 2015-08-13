@@ -1,6 +1,8 @@
 package com.unioeste.sd;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.unioeste.sd.controller.Controller;
 import com.unioeste.sd.facade.FacadeChat;
@@ -18,9 +20,11 @@ public class ChatClient extends Application {
 	private Scene scene;
 	private FacadeChat chat;
 	private FacadeUser user;
+	private List<FacadeUser> havingChat;
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		this.havingChat = new ArrayList<FacadeUser>();
 		this.stage = primaryStage;
 		this.scene = new Scene(new StackPane());
 		
@@ -65,6 +69,10 @@ public class ChatClient extends Application {
 	
 	public void setUser(FacadeUser user) {
 		this.user = user;
+	}
+	
+	public List<FacadeUser> getChatList(){
+		return this.havingChat;
 	}
 	
 	public static void main(String args[]) {
