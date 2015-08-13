@@ -42,6 +42,7 @@ public class LoginController implements Controller{
 				
 				FacadeChat chat = connector.connect(this.client.getUser());
 				this.client.setChat(chat);
+				this.client.setLastUpdate(chat.getLastUpdate());
 				
 				this.client.authenticated(username.getText());
 			} catch (Exception e) {

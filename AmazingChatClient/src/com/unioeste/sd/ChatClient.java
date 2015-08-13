@@ -2,6 +2,7 @@ package com.unioeste.sd;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.unioeste.sd.controller.Controller;
@@ -21,6 +22,7 @@ public class ChatClient extends Application {
 	private FacadeChat chat;
 	private FacadeUser user;
 	private List<FacadeUser> havingChat;
+	private Date lastUpdate;
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -73,6 +75,14 @@ public class ChatClient extends Application {
 	
 	public List<FacadeUser> getChatList(){
 		return this.havingChat;
+	}
+	
+	public Date getLastUpdate(){
+		return this.lastUpdate;
+	}
+	
+	public void setLastUpdate(Date lastUpdate){
+		this.lastUpdate = lastUpdate;
 	}
 	
 	public static void main(String args[]) {
