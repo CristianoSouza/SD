@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<Tab text="User Name" xmlns="http://javafx.com/javafx/8.0.45" xmlns:fx="http://javafx.com/fxml/1">
+<Tab closable="false" text="New User" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.unioeste.sd.controller.UnicastController">
    <content>
       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="392.0" prefWidth="471.0">
          <children>
@@ -12,30 +12,22 @@
                <items>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                      <children>
-                        <ScrollPane layoutX="112.0" layoutY="21.0" prefHeight="294.0" prefWidth="554.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-                           </content>
-                        </ScrollPane>
+                        <TextArea fx:id="unicastPanel" editable="false" prefHeight="324.0" prefWidth="554.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                      </children>
                   </AnchorPane>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                      <children>
                         <BorderPane layoutX="14.0" layoutY="-57.0" prefHeight="99.0" prefWidth="554.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <center>
-                              <ScrollPane prefHeight="80.0" prefWidth="554.0" BorderPane.alignment="CENTER">
-                                 <content>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-                                 </content>
-                              </ScrollPane>
-                           </center>
                            <bottom>
                               <BorderPane prefWidth="200.0" BorderPane.alignment="CENTER">
                                  <right>
-                                    <Button mnemonicParsing="false" text="Send" BorderPane.alignment="CENTER" />
+                                    <Button mnemonicParsing="false" onAction="#handleSendButtonAction" text="Send" BorderPane.alignment="CENTER" />
                                  </right>
                               </BorderPane>
                            </bottom>
+                           <center>
+                              <TextArea fx:id="textToSend" onKeyPressed="#handleTextToSendKeyPressed" prefHeight="200.0" prefWidth="200.0" wrapText="true" BorderPane.alignment="CENTER" />
+                           </center>
                         </BorderPane>
                      </children>
                   </AnchorPane>

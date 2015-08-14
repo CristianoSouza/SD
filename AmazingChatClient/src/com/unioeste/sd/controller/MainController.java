@@ -2,19 +2,23 @@ package com.unioeste.sd.controller;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 
 import com.unioeste.sd.ChatClient;
+import com.unioeste.sd.facade.FacadeMessage;
 import com.unioeste.sd.facade.FacadeUser;
-import com.unioeste.sd.implement.Message;
+import com.unioeste.sd.infra.Register;
 import com.unioeste.sd.misc.UserListCell;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,16 +26,41 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 
 public class MainController implements Controller{
-	@FXML
-	private ListView<FacadeUser> userList;
-	@FXML
-	private TabPane chatPane;
-	
+	@FXML private ListView<FacadeUser> userList;
+	@FXML private TextArea textToSend;
+	@FXML private TextArea broadcastPanel;
+	@FXML private TabPane chatPane;
 	private ChatClient client;
+	private Register register;
+	private SimpleDateFormat formatter;
+	
+	public MainController() {
+		this.register = new Register();
+		this.formatter = new SimpleDateFormat("hh:mm:ss");
+	}
+	
+	private FacadeMessage buildMessage(String message){
+		FacadeMessage m = null;
+		
+		try {
+			m = this.register.getMessageInstance();
+			m.setUser(client.getUser());
+			m.setMessage(message);
+			m.setDate(new Date());
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+			
+		return m;
+	}
 	
 	@FXML
 	private void handleExitButtonAction(ActionEvent event){
@@ -42,6 +71,29 @@ public class MainController implements Controller{
 		}
 		
 		Platform.exit();
+		System.exit(0);
+	}
+	
+	@FXML
+	private void handleTextToSendKeyPressed(KeyEvent event){
+		if(event.getCode() == KeyCode.ENTER){
+			handleSendButtonAction(null);
+			event.consume();
+		}
+	}
+	
+	@FXML
+	private void handleSendButtonAction(ActionEvent event){
+		try{
+			FacadeMessage message = this.buildMessage(textToSend.getText());		
+			client.getChat().sendBroadcastMessage(message);
+		} catch(RemoteException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		textToSend.clear();
 	}
 
 	public void initManager(final ChatClient chatClient) {
@@ -49,6 +101,15 @@ public class MainController implements Controller{
 		try {
 			this.buildOnlineList(new ArrayList<FacadeUser>(Arrays.asList(this.client.getChat().getLoggedUsers())));
 		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			FacadeMessage message = this.buildMessage("Hi! I'm online.");
+			this.client.getChat().sendBroadcastMessage(message);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -72,21 +133,30 @@ public class MainController implements Controller{
 							client.setLastUpdate(client.getChat().getLastUpdate());
 							buildOnlineList(new ArrayList<FacadeUser>(Arrays.asList(client.getChat().getLoggedUsers())));
 						}
+						
+						FacadeMessage[] broadcastMessages = client.getChat().getBroadcastMessagesAfter(client.getLastReceivedMessageDate());
+						
+						for(FacadeMessage message : broadcastMessages){
+							String date = formatter.format(message.getDate());
+							broadcastPanel.appendText("[" + date + "]" + message.getUser().getName() + ": " + message.getMessage() + "\n");
+						}
+						
+						client.setLastReceivedMessageDate(new Date());
+						
+						FacadeUser[] onGoingChat = client.getChat().getOnGoingChatWith(client.getUser());
+						
+						for(FacadeUser user : onGoingChat){
+							if(!client.getChatList().contains(user)){
+								createTab(user);
+								client.getChatList().add(user);
+							}
+						}
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}
 				}
 			}
 		}).start();
-		
-		try {
-			Message m = new Message();
-			m.setMessage("Olá");
-			client.getChat().sendBroadcastMessage(m);
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	private void buildOnlineList(Collection<FacadeUser> loggedUsers){
@@ -120,14 +190,7 @@ public class MainController implements Controller{
 									e.printStackTrace();
 								}
 								
-								try {
-									Tab tab = FXMLLoader.load(getClass().getResource("../view/NewChat.fxml"));
-									tab.setText(cell.getText());
-									tab.setClosable(true);
-									chatPane.getTabs().add(tab);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+								createTab(cell.getItem());
 							}
 						}
 					}
@@ -136,5 +199,31 @@ public class MainController implements Controller{
 				return cell;
 			}
 		});
+	}
+
+	private void createTab(FacadeUser user){
+		System.out.println("Trying to create tab");
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("../view/NewChat.fxml"));
+			Tab tab = loader.load();
+			
+			UnicastController controller = loader.<UnicastController>getController();
+			controller.setUser(user);
+			controller.initManager(client);
+			
+			tab.setText(user.getName());
+			tab.setClosable(true);
+			
+			tab.setOnCloseRequest(new EventHandler<Event>() {
+				@Override
+				public void handle(Event event) {
+					client.getChatList().remove(user);
+				}
+			});
+			
+			chatPane.getTabs().add(tab);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

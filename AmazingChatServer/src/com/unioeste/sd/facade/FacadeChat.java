@@ -10,6 +10,8 @@ public interface FacadeChat extends Remote{
 	public void sendBroadcastMessage(FacadeMessage message) throws RemoteException;
 	public void sendUnicastMessage(FacadeUser target, FacadeMessage message) throws RemoteException;
 	public FacadeUser[] getLoggedUsers() throws RemoteException;
+	public FacadeUser[] getOnGoingChatWith(FacadeUser user) throws RemoteException;
 	public FacadeMessage[] getMessagesAfter(FacadeUser user, Date date) throws RemoteException;
+	public FacadeMessage[] getBroadcastMessagesAfter(Date date) throws RemoteException;
 	public Date getLastUpdate() throws RemoteException;
 }

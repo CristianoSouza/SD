@@ -2,7 +2,7 @@ package com.unioeste.sd.facade;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.sql.Date;
+import java.util.Date;
 
 import com.unioeste.sd.implement.Message.Type;
 

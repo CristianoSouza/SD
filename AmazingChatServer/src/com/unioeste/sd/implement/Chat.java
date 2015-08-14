@@ -18,6 +18,7 @@ public class Chat extends UnicastRemoteObject implements FacadeChat {
 	private static final long serialVersionUID = 1L;
 	private List<FacadeUser> users;
 	private HashMap<FacadeUser, List<FacadeMessage>> messagesBuffer;
+	private HashMap<FacadeUser, List<FacadeUser>> onGoingChat;
 	private FacadeUser broadcastUser;
 	private Date lastUpdate;
 
@@ -29,6 +30,8 @@ public class Chat extends UnicastRemoteObject implements FacadeChat {
 		this.messagesBuffer = new HashMap<FacadeUser, List<FacadeMessage>>();
 		this.broadcastUser = new User();
 		this.messagesBuffer.put(broadcastUser, new ArrayList<FacadeMessage>());
+		
+		this.onGoingChat = new HashMap<FacadeUser, List<FacadeUser>>();
 		
 		this.lastUpdate = new Date();
 	}
@@ -46,6 +49,8 @@ public class Chat extends UnicastRemoteObject implements FacadeChat {
 		if(!contains){
 			System.out.println("User " + user.getName() + " is now online");
 			this.users.add(user);
+			this.messagesBuffer.put(user, new ArrayList<FacadeMessage>());
+			this.onGoingChat.put(user, new ArrayList<FacadeUser>());
 			this.lastUpdate = new Date();
 		} else {
 			throw new RemoteException("This user already online");
@@ -54,8 +59,10 @@ public class Chat extends UnicastRemoteObject implements FacadeChat {
 
 	@Override
 	public void logout(FacadeUser user) throws RemoteException {
-		System.out.println("User " + user.getName() + "has left");
+		System.out.println("User " + user.getName() + " has left");
 		this.users.remove(user);
+		this.messagesBuffer.remove(user);
+		this.onGoingChat.remove(user);
 		this.lastUpdate = new Date();
 	}
 
@@ -68,7 +75,15 @@ public class Chat extends UnicastRemoteObject implements FacadeChat {
 	@Override
 	public void sendUnicastMessage(FacadeUser target, FacadeMessage message) throws RemoteException {
 		System.out.println("Sending unicast message");
-		target.receive(message);
+		if(!this.onGoingChat.keySet().contains(target)){
+			System.out.println("This user isn't online");
+		} else {
+			if(!this.onGoingChat.get(target).contains(message.getUser())){
+				this.onGoingChat.get(target).add(message.getUser());
+			}
+		}
+		
+		this.messagesBuffer.get(target).add(message);
 	}
 
 	@Override
@@ -99,5 +114,15 @@ public class Chat extends UnicastRemoteObject implements FacadeChat {
 		}
 		
 		return newMessasges.toArray(new FacadeMessage[newMessasges.size()]);
+	}
+
+	@Override
+	public FacadeMessage[] getBroadcastMessagesAfter(Date date) throws RemoteException {
+		return this.getMessagesAfter(broadcastUser, date);
+	}
+
+	@Override
+	public FacadeUser[] getOnGoingChatWith(FacadeUser user) throws RemoteException {
+		return this.onGoingChat.get(user).toArray(new FacadeUser[this.onGoingChat.get(user).size()]);
 	}
 }

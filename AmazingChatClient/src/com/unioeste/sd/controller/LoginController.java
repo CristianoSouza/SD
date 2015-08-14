@@ -1,6 +1,7 @@
 package com.unioeste.sd.controller;
 
 import java.net.Inet4Address;
+import java.util.Date;
 
 import com.unioeste.sd.ChatClient;
 import com.unioeste.sd.facade.FacadeChat;
@@ -43,6 +44,7 @@ public class LoginController implements Controller{
 				FacadeChat chat = connector.connect(this.client.getUser());
 				this.client.setChat(chat);
 				this.client.setLastUpdate(chat.getLastUpdate());
+				this.client.setLastReceivedMessageDate(new Date());
 				
 				this.client.authenticated(username.getText());
 			} catch (Exception e) {

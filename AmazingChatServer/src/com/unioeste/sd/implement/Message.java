@@ -2,7 +2,7 @@ package com.unioeste.sd.implement;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.Date;
+import java.util.Date;
 
 import com.unioeste.sd.facade.FacadeMessage;
 import com.unioeste.sd.facade.FacadeUser;
